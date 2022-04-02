@@ -1,0 +1,79 @@
+const auth = require("../middleware/auth");
+
+module.exports = app => {
+  
+  var router = require("express").Router();
+
+  const user = require("../controllers/user.controller.js");
+  const nanny = require("../controllers/nanny.controller.js");
+  const child = require("../controllers/child.controller.js");
+  const location = require("../controllers/location.controller.js");
+  const report = require("../controllers/report.controller.js");
+  const milkSession = require("../controllers/milkSession.controller.js");
+  const config = require("../controllers/config.controller.js");
+
+
+  app.use('/api', router);
+
+  router.get("/token", function (req, res, next) {
+      res.send(require('crypto').randomBytes(64).toString('hex'));
+  });
+  router.post("/register", user.register);
+  router.post("/login", user.login);
+
+  router.use('/nanny', auth);
+  router.post("/nanny/register", nanny.register);
+  router.get("/nanny/get-by-same-location", nanny.getBySameLocation);
+
+  router.use('/report', auth);
+  router.get("/report/get-by-same-nanny-location", report.getBySameNannyLocation);
+
+
+  router.use('/user', auth);
+  router.post("/user/add", user.add);
+  router.get("/user", user.index);
+  router.get("/user/view/:id", user.view);
+  router.post("/user/edit/:id", user.edit);
+  router.post("/user/del/:id", user.del);
+
+  router.post("/nanny/add", nanny.add);
+  router.get("/nanny", nanny.index);
+  router.get("/nanny/view/:id", nanny.view);
+  router.post("/nanny/edit/:id", nanny.edit);
+  router.post("/nanny/del/:id", nanny.del);
+
+  router.use('/child', auth);
+  router.post("/child/add", child.add);
+  router.get("/child", child.index);
+  router.get("/child/view/:id", child.view);
+  router.post("/child/edit/:id", child.edit);
+  router.post("/child/del/:id", child.del);
+
+  router.use('/location', auth);
+  router.post("/location/add", location.add);
+  router.get("/location", location.index);
+  router.get("/location/view/:id", location.view);
+  router.post("/location/edit/:id", location.edit);
+  router.post("/location/del/:id", location.del);
+
+  router.post("/report/add", report.add);
+  router.get("/report", report.index);
+  router.get("/report/view/:id", report.view);
+  router.post("/report/edit/:id", report.edit);
+  router.post("/report/del/:id", report.del);
+
+  router.use('/milk-session', auth);
+  router.post("/milk-session/add", milkSession.add);
+  router.get("/milk-session", milkSession.index);
+  router.get("/milk-session/view/:id", milkSession.view);
+  router.post("/milk-session/edit/:id", milkSession.edit);
+  router.post("/milk-session/del/:id", milkSession.del);
+
+  router.use('/config', auth);
+  router.post("/config/add", config.add);
+  router.get("/config", config.index);
+  router.get("/config/view/:id", config.view);
+  router.post("/config/edit/:id", config.edit);
+  router.post("/config/del/:id", config.del);
+
+};
