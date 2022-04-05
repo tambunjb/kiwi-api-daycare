@@ -19,7 +19,8 @@ const sequelize = new Sequelize(process.env.DB, process.env.USER, process.env.PA
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at'
-  }
+  },
+  omitNull: true
 });
 
 const db = {};
