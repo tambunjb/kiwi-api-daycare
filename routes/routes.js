@@ -13,7 +13,8 @@ module.exports = app => {
   const config = require("../controllers/config.controller.js");
 
 
-  app.use('/api', router);
+  //app.use('/api', router);
+  app.use('/', router);
 
   router.get("/token", function (req, res, next) {
       res.send(require('crypto').randomBytes(64).toString('hex'));
