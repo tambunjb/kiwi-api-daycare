@@ -6,7 +6,7 @@ module.exports = (sequelize, Sequelize) => {
     shared_at: {
       type: Sequelize.DATE,
       get() {
-          return this.getDataValue('shared_at')!=null && !isNaN(this.getDataValue('shared_at'))?require('moment')(this.getDataValue('shared_at')).format('YYYY-MM-DD HH:mm:ss'):null;
+          return this.getDataValue('shared_at')!=null/* && !isNaN(this.getDataValue('shared_at'))*/?require('moment')(this.getDataValue('shared_at')).format('YYYY-MM-DD HH:mm:ss'):null;
       }
     },
     attendance: {
