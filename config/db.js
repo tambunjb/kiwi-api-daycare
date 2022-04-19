@@ -5,6 +5,9 @@ const jwt = require('jsonwebtoken');
 const sequelize = new Sequelize(process.env.DB, process.env.USER, process.env.PASSWORD, {
   host: process.env.HOST,
   dialect: process.env.DIALECT,
+  dialectOptions: {
+    useUTC: false
+  },
   timezone: process.env.TIMEZONE,
   pool: {
     max: parseInt(process.env.POOLMAX),
