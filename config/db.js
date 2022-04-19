@@ -6,7 +6,14 @@ const sequelize = new Sequelize(process.env.DB, process.env.USER, process.env.PA
   host: process.env.HOST,
   dialect: process.env.DIALECT,
   dialectOptions: {
-    useUTC: false
+    useUTC: false,
+    dateStrings: true,
+    typeCast: function (field, next) {
+      if (field.type === 'DATETIME') {
+        return field.string()
+      }
+      return next()
+    },
   },
   timezone: process.env.TIMEZONE,
   pool: {
