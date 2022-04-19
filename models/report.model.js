@@ -57,6 +57,24 @@ module.exports = (sequelize, Sequelize) => {
     lunch_notes: {
       type: Sequelize.STRING
     },
+    afternoonsnack: {
+      type: Sequelize.STRING
+    },
+    afternoonsnack_qty: {
+      type: Sequelize.STRING
+    },
+    afternoonsnack_notes: {
+      type: Sequelize.STRING
+    },
+    dinner: {
+      type: Sequelize.STRING
+    },
+    dinner_qty: {
+      type: Sequelize.STRING
+    },
+    dinner_notes: {
+      type: Sequelize.STRING
+    },
     naptime1_start: {
       type: Sequelize.TIME
     },

@@ -73,6 +73,12 @@ exports.add = async (req, res, next) => {
     lunch: req.body.lunch ?? null,
     lunch_qty: req.body.lunch_qty ?? null,
     lunch_notes: req.body.lunch_notes ?? null,
+    afternoonsnack: req.body.afternoonsnack ?? null,
+    afternoonsnack_qty: req.body.afternoonsnack_qty ?? null,
+    afternoonsnack_notes: req.body.afternoonsnack_notes ?? null,
+    dinner: req.body.dinner ?? null,
+    dinner_qty: req.body.dinner_qty ?? null,
+    dinner_notes: req.body.dinner_notes ?? null,
     naptime1_start: req.body.naptime1_start ?? null,
     naptime1_end: req.body.naptime1_end ?? null,
     naptime1_notes: req.body.naptime1_notes ?? null,
@@ -172,6 +178,24 @@ exports.index = (req, res) => {
     }
     if(req.query.lunch_notes){
       condition.where.lunch_notes = { [Op.like]: `%${req.query.lunch_notes}%` }
+    }
+    if(req.query.afternoonsnack){
+      condition.where.afternoonsnack = { [Op.like]: `%${req.query.afternoonsnack}%` }
+    }
+    if(req.query.afternoonsnack_qty){
+      condition.where.afternoonsnack_qty = { [Op.like]: `%${req.query.afternoonsnack_qty}%` }
+    }
+    if(req.query.afternoonsnack_notes){
+      condition.where.afternoonsnack_notes = { [Op.like]: `%${req.query.afternoonsnack_notes}%` }
+    }
+    if(req.query.dinner){
+      condition.where.dinner = { [Op.like]: `%${req.query.dinner}%` }
+    }
+    if(req.query.dinner_qty){
+      condition.where.dinner_qty = { [Op.like]: `%${req.query.dinner_qty}%` }
+    }
+    if(req.query.dinner_notes){
+      condition.where.dinner_notes = { [Op.like]: `%${req.query.dinner_notes}%` }
     }
     if(req.query.naptime1_start){
       condition.where.naptime1_start = { [Op.like]: `%${req.query.naptime1_start}%` }
