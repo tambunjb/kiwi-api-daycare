@@ -127,7 +127,15 @@ exports.setVersionUpdate = (req, res, next) => {
         }
     })
 
-    return res.send({message: 'Success'});
+    let condition = {};
+    condition.where = { [Op.or]: [
+      { name: forced_key },
+      { name: recommend_key }
+    ]}
+
+  Config.findAll(condition).then(data => {
+    return res.send(data);
+  });
 };
 
 exports.add = (req, res, next) => {
