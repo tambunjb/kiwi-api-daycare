@@ -3,8 +3,8 @@ const Config = db.config;
 const Op = db.Sequelize.Op;
 
 exports.getVersionUpdate = (req, res) => {
-  const appid = req.params.appid;
-  const version = req.params.version;
+  const appid = req.query.appid;
+  const version = req.query.version;
   if (!(version && appid)) {
     return res.status(400).send({
       message: "Invalid params!"

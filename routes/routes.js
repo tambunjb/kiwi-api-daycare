@@ -33,7 +33,7 @@ module.exports = app => {
   router.get("/report/get-by-same-nanny-location", report.getBySameNannyLocation);
 
   router.use('/config', auth);
-  router.get("/config/get-version-update/:appid/:version", config.getVersionUpdate);
+  router.get("/config/get-version-update", config.getVersionUpdate);
   router.post("/config/set-version-update", config.setVersionUpdate);
 
   router.use('/user', auth);
