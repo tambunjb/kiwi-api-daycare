@@ -4,6 +4,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false
     },
+    location_id: {
+      type: Sequelize.INTEGER,
+      allowNull: false
+    },
     gender: {
       type: Sequelize.STRING,
       allowNull: false

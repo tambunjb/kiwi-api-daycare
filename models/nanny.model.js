@@ -5,7 +5,8 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false
     },
     location_id: {
-      type: Sequelize.INTEGER
+      type: Sequelize.INTEGER,
+      allowNull: false
     },
     deleted_at: {
       type: Sequelize.DATE
