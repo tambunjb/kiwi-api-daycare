@@ -29,6 +29,9 @@ module.exports = app => {
   router.use('/report', auth);
   router.get("/report/get-by-same-nanny-location", report.getBySameNannyLocation);
 
+  router.use('/config', auth);
+  router.get("/config/get-version-update/:appid/:version", config.getVersionUpdate);
+  router.post("/config/set-version-update", config.setVersionUpdate);
 
   router.use('/user', auth);
   router.post("/user/add", user.add);
@@ -70,7 +73,6 @@ module.exports = app => {
   router.post("/milk-session/edit/:id", milkSession.edit);
   router.post("/milk-session/del/:id", milkSession.del);
 
-  router.use('/config', auth);
   router.post("/config/add", config.add);
   router.get("/config", config.index);
   router.get("/config/view/:id", config.view);
