@@ -1,6 +1,36 @@
 const db = require("../models");
 const Child = db.child;
+const User = db.user;
+const Nanny = db.nanny;
 const Op = db.Sequelize.Op;
+
+exports.getBySameLocation = async (req, res) => {
+  let condition = {};
+  const user = await User.findOne({where: {phone: req.user}, include: Nanny});
+  condition.where = {};
+  if(user.nanny){
+    condition.where.location_id = user.nanny.location_id;
+  }
+
+  const { page, size } = req.query;
+  const { limit, offset } = db.getPagination(page, size);
+  if(offset >= 0){
+    condition.limit = limit;
+    condition.offset = offset;
+  }
+
+  Child.findAndCountAll(condition)
+    .then(data => {
+      const response = db.getPagingData(data, page, limit);
+      res.send(response);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving child."
+      });
+    });
+};
 
 exports.add = (req, res, next) => {
   // Validate request

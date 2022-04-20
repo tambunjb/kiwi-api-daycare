@@ -26,6 +26,9 @@ module.exports = app => {
   router.post("/nanny/register", nanny.register);
   router.get("/nanny/get-by-same-location", nanny.getBySameLocation);
 
+  router.use('/child', auth);
+  router.get("/child/get-by-same-location", child.getBySameLocation);
+
   router.use('/report', auth);
   router.get("/report/get-by-same-nanny-location", report.getBySameNannyLocation);
 
@@ -46,7 +49,6 @@ module.exports = app => {
   router.post("/nanny/edit/:id", nanny.edit);
   router.post("/nanny/del/:id", nanny.del);
 
-  router.use('/child', auth);
   router.post("/child/add", child.add);
   router.get("/child", child.index);
   router.get("/child/view/:id", child.view);
