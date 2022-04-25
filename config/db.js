@@ -29,7 +29,7 @@ const sequelize = new Sequelize(process.env.DB, process.env.USER, process.env.PA
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at'
   },
-  omitNull: true
+  omitNull: false
 });
 
 const db = {};
