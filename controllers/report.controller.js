@@ -5,6 +5,79 @@ const Nanny = db.nanny;
 const MilkSession = db.milkSession;
 const Op = db.Sequelize.Op;
 
+exports.setAbsent = async (req, res) => {
+  const id = req.params.id;
+
+  const fieldsAbsent = {
+    attendance: 0,
+    updated_by: req.user,
+    arrival_time: null,
+    shared_at: null,
+    child_feeling: null,
+    temperature: null,
+    condition: null,
+    condition_notes: null,
+    weight: null,
+    breakfast: null,
+    breakfast_qty: null,
+    breakfast_notes: null,
+    morningsnack: null,
+    morningsnack_qty: null,
+    morningsnack_notes: null,
+    lunch: null,
+    lunch_qty: null,
+    lunch_notes: null,
+    afternoonsnack: null,
+    afternoonsnack_qty: null,
+    afternoonsnack_notes: null,
+    dinner: null,
+    dinner_qty: null,
+    dinner_notes: null,
+    naptime1_start: null,
+    naptime1_end: null,
+    naptime1_notes: null,
+    naptime2_start: null,
+    naptime2_end: null,
+    naptime2_notes: null,
+    naptime3_start: null,
+    naptime3_end: null,
+    naptime3_notes: null,
+    num_of_potty: null,
+    potty_notes: null,
+    is_morning_bath: null,
+    is_afternoon_bath: null,
+    medication: null,
+    medication_notes: null,
+    activities: null,
+    things_tobring_tmr: null,
+    special_notes: null
+  }
+
+  let condition = {};
+  condition.where = { report_id: id }
+
+  db.sequelize.transaction(function(t) {
+    MilkSession.findAll(condition)
+      .then(data => {
+        for(let i=0;i<data.length;i++) {
+          MilkSession.update({deleted_by: req.user}, {where: {id: data[i].id}, silent: true}, {transaction: t})
+            .then(num => {
+              MilkSession.destroy({where: { id: data[i].id }}, {transaction: t});
+            });
+        }
+
+        Report.update(fieldsAbsent, {where: { id: id }}, {transaction: t}).then(num => {
+          if(num==1) res.send({id: id})
+        })
+    });
+  }).catch(err => {
+    res.status(500).send({
+      message: err.message || "Error updating Report"
+    });
+  });
+
+}
+
 exports.getBySameNannyLocation = async (req, res) => {
   let condition = {};
 

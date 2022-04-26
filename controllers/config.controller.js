@@ -2,6 +2,88 @@ const db = require("../models");
 const Config = db.config;
 const Op = db.Sequelize.Op;
 
+exports.setReportRequiredFields = (req, res, next) => {
+  const appid = req.body.appid ?? null
+  const fields = req.body.fields ?? null
+  
+  // Validate request
+  if (!(appid && fields)) {
+    return res.status(400).send({
+      message: "Content can not be empty!"
+    });
+  }
+
+  const name = `${appid}_report_required_fields`
+
+  Config.findOne({ where: {name: name} })
+    .then(function(obj) {
+        // update
+        if(obj){
+          Config.update({ value: fields, updated_by: req.user }, { where: {name: name} }).then(num => {
+              if (num == 1) {
+                res.send({'name': name});
+              } else {
+                return res.status(404).send({
+                  message: `Cannot update Config with name=${name}. Maybe Config was not found or req.body is empty!`
+                });
+              }
+            })
+            .catch(err => {
+              return res.status(500).send({
+                message: err.message || "Error updating Config with name="+name
+              });
+            });
+
+        } else {
+          // insert
+          const config = {
+            name: name,
+            desc: `Required fields for report form of App ${appid}`,
+            value: fields,
+            created_by: req.user
+          };
+          Config.create(config)
+            .then(data => {
+              res.send({id: data.id});
+            })
+            .catch(err => {
+              return res.status(500).send({
+                message:
+                  err.message || "Some error occurred while creating the Config."
+              });
+            });
+        }
+    })
+}
+
+exports.getReportRequiredFields = (req, res) => {
+  const appid = req.query.appid;
+  
+  if (!appid) {
+    return res.status(400).send({
+      message: "Invalid params!"
+    });
+  }
+
+  const name = `${appid}_report_required_fields`
+
+  let condition = {};
+  condition.where = { name: name }
+
+  Config.findOne(condition)
+    .then(data => {
+      if(data)
+        res.send({fields: data.value});
+      else res.send({});
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving config."
+      });
+    });
+};
+
 exports.getVersionUpdate = (req, res) => {
   const appid = req.query.appid;
   const version = req.query.version;
@@ -56,7 +138,7 @@ exports.setVersionUpdate = (req, res, next) => {
     .then(function(obj) {
         // update
         if(obj){
-          Config.update({ value: forced }, { where: {name: forced_key} }).then(num => {
+          Config.update({ value: forced, updated_by: req.user }, { where: {name: forced_key} }).then(num => {
               if (!(num == 1)) {
                 return res.status(404).send({
                   message: `Cannot update Config with name=${forced_key}. Maybe Config was not found or req.body is empty!`
@@ -94,7 +176,7 @@ exports.setVersionUpdate = (req, res, next) => {
     .then(function(obj) {
         // update
         if(obj){
-          Config.update({ value: recommend }, { where: {name: recommend_key} }).then(num => {
+          Config.update({ value: recommend, updated_by: req.user }, { where: {name: recommend_key} }).then(num => {
               if (!(num == 1)) {
                 return res.status(404).send({
                   message: `Cannot update Config with name=${recommend_key}. Maybe Config was not found or req.body is empty!`

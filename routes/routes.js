@@ -31,10 +31,13 @@ module.exports = app => {
 
   router.use('/report', auth);
   router.get("/report/get-by-same-nanny-location", report.getBySameNannyLocation);
+  router.post("/report/set-absent/:id", report.setAbsent);
 
   router.use('/config', auth);
   router.get("/config/get-version-update", config.getVersionUpdate);
   router.post("/config/set-version-update", config.setVersionUpdate);
+  router.get("/config/get-report-required-fields", config.getReportRequiredFields);
+  router.post("/config/set-report-required-fields", config.setReportRequiredFields);
 
   router.use('/user', auth);
   router.post("/user/add", user.add);
