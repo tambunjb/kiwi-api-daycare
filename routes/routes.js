@@ -12,6 +12,16 @@ module.exports = app => {
   const milkSession = require("../controllers/milkSession.controller.js");
   const config = require("../controllers/config.controller.js");
 
+  function postTrimmer(req, res, next) {
+      if (req.method === 'POST') {
+          for (const [key, value] of Object.entries(req.body)) {
+              if (typeof(value) === 'string')
+                  req.body[key] = value.trim();
+          }
+      }
+      next();
+  }
+  app.use(postTrimmer);
 
   //app.use('/api', router);
   app.use('/', router);
