@@ -10,6 +10,7 @@ module.exports = app => {
   const location = require("../controllers/location.controller.js");
   const report = require("../controllers/report.controller.js");
   const milkSession = require("../controllers/milkSession.controller.js");
+  const mealConfig = require("../controllers/mealConfig.controller.js");
   const config = require("../controllers/config.controller.js");
 
   function postTrimmer(req, res, next) {
@@ -42,6 +43,10 @@ module.exports = app => {
   router.use('/report', auth);
   router.get("/report/get-by-same-nanny-location", report.getBySameNannyLocation);
   router.post("/report/set-absent/:id", report.setAbsent);
+
+  router.use('/meal-config', auth);
+  router.post("/meal-config/set-by-location/:location_id", mealConfig.setByLocation);
+  router.get("/meal-config/get-by-location/:location_id/:day_of_month", mealConfig.getByLocation);
 
   router.use('/config', auth);
   router.get("/config/get-version-update", config.getVersionUpdate);
@@ -87,6 +92,12 @@ module.exports = app => {
   router.get("/milk-session/view/:id", milkSession.view);
   router.post("/milk-session/edit/:id", milkSession.edit);
   router.post("/milk-session/del/:id", milkSession.del);
+
+  router.post("/meal-config/add", mealConfig.add);
+  router.get("/meal-config", mealConfig.index);
+  router.get("/meal-config/view/:id", mealConfig.view);
+  router.post("/meal-config/edit/:id", mealConfig.edit);
+  router.post("/meal-config/del/:id", mealConfig.del);
 
   router.post("/config/add", config.add);
   router.get("/config", config.index);
