@@ -164,30 +164,30 @@ exports.getByLocation = (req, res, next) => {
 }
 
 exports.getBySameNannyLocation = async (req, res) => {
-  let condition = {};
-
+  let sub_condition = {};
   const user = await User.findOne({where: {phone: req.user}, include: Nanny});
   if(user.nanny){
-    condition.location_id = { [Op.eq]: user.nanny.location_id };
+    sub_condition.location_id = { [Op.eq]: user.nanny.location_id };
   }
 
+  let condition = {};
   const { page, size } = req.query;
   const { limit, offset } = db.getPagination(page, size);
   if(offset >= 0){
     condition.limit = limit;
     condition.offset = offset;
   }
+  condition.include = [ {
+      model: Nanny,
+      where: sub_condition
+    }, {
+      model: Child,
+      where: sub_condition
+    }
+  ]
 
-  Mapping.findAndCountAll({
-    include: [ {
-        model: Nanny,
-        where: condition
-      }, {
-        model: Child,
-        where: condition
-      }
-    ]
-  }).then(data => {
+  Mapping.findAndCountAll(condition)
+    .then(data => {
       data.rows = data.rows.map((mapping, index) => {
         return {
           id: mapping.id,
@@ -195,6 +195,7 @@ exports.getBySameNannyLocation = async (req, res) => {
           nanny_name: mapping.nanny.name,
           child_id: mapping.child_id,
           child_name: mapping.child.name,
+          location_id: user.nanny.location_id
         }
       })
 
