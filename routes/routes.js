@@ -11,6 +11,7 @@ module.exports = app => {
   const report = require("../controllers/report.controller.js");
   const milkSession = require("../controllers/milkSession.controller.js");
   const mealConfig = require("../controllers/mealConfig.controller.js");
+  const mapping = require("../controllers/mapping.controller.js");
   const config = require("../controllers/config.controller.js");
 
   function postTrimmer(req, res, next) {
@@ -47,6 +48,12 @@ module.exports = app => {
   router.use('/meal-config', auth);
   router.post("/meal-config/set-by-location/:location_id", mealConfig.setByLocation);
   router.get("/meal-config/get-by-location/:location_id/:day_of_month", mealConfig.getByLocation);
+
+  router.use('/mapping', auth);
+  router.post("/mapping/add-bulk/", mapping.addBulk);
+  router.post("/mapping/del-bulk/", mapping.delBulk);
+  router.get("/mapping/get-by-location/:location_id/:nanny_id", mapping.getByLocation);
+  router.get("/mapping/get-by-same-nanny-location", mapping.getBySameNannyLocation);
 
   router.use('/config', auth);
   router.get("/config/get-version-update", config.getVersionUpdate);
@@ -98,6 +105,12 @@ module.exports = app => {
   router.get("/meal-config/view/:id", mealConfig.view);
   router.post("/meal-config/edit/:id", mealConfig.edit);
   router.post("/meal-config/del/:id", mealConfig.del);
+
+  router.post("/mapping/add", mapping.add);
+  router.get("/mapping", mapping.index);
+  router.get("/mapping/view/:id", mapping.view);
+  router.post("/mapping/edit/:id", mapping.edit);
+  router.post("/mapping/del/:id", mapping.del);
 
   router.post("/config/add", config.add);
   router.get("/config", config.index);
