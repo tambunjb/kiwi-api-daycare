@@ -2,6 +2,7 @@ const db = require("../models");
 const Report = db.report;
 const User = db.user;
 const Nanny = db.nanny;
+const Child = db.child;
 const MilkSession = db.milkSession;
 const Op = db.Sequelize.Op;
 
@@ -99,9 +100,17 @@ exports.getBySameNannyLocation = async (req, res) => {
     condition.offset = offset;
   }
 
-  condition.include = [{model: MilkSession}];
+  condition.include = [
+    {model: MilkSession},
+    {model: Nanny},
+    {model: Child}
+  ];
   Report.findAndCountAll(condition)
     .then(data => {
+      data.rows.forEach(row => {
+        row.setDataValue('nanny_name', row.nanny.name);
+        row.setDataValue('child_name', row.child.name);
+      })
       const response = db.getPagingData(data, page, limit);
       res.send(response);
     })
