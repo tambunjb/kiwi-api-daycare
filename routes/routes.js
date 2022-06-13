@@ -68,7 +68,7 @@ module.exports = app => {
   router.post("/user/edit/:id", user.edit);
   router.post("/user/del/:id", user.del);
 
-  router.post("/nanny/add", nanny.add);
+  //router.post("/nanny/add", nanny.add);
   router.get("/nanny", nanny.index);
   router.get("/nanny/view/:id", nanny.view);
   router.post("/nanny/edit/:id", nanny.edit);
