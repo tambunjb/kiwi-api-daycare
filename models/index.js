@@ -22,6 +22,20 @@ db.report = require("./report.model.js")(db.sequelize, db.Sequelize);
 db.milkSession = require("./milkSession.model.js")(db.sequelize, db.Sequelize);
 db.mealConfig = require("./mealConfig.model.js")(db.sequelize, db.Sequelize);
 db.mapping = require("./mapping.model.js")(db.sequelize, db.Sequelize);
+db.parent = require("./parent.model.js")(db.sequelize, db.Sequelize);
+db.family = require("./family.model.js")(db.sequelize, db.Sequelize);
+
+// user - parent
+db.user.hasOne(db.parent, {
+  foreignKey: 'user_id'
+});
+db.parent.belongsTo(db.user, {
+  foreignKey: {
+    name: 'user_id',
+    type: db.Sequelize.INTEGER,
+    allowNull: false
+  }
+});
 
 // user - nanny
 db.user.hasOne(db.nanny, {
@@ -42,6 +56,28 @@ db.location.hasMany(db.mealConfig, {
 db.mealConfig.belongsTo(db.location, {
   foreignKey: {
     name: 'location_id',
+    type: db.Sequelize.INTEGER,
+    allowNull: false
+  }
+});
+
+// family
+db.parent.hasMany(db.family, {
+  foreignKey: 'parent_id'
+});
+db.child.hasMany(db.family, {
+  foreignKey: 'child_id'
+});
+db.family.belongsTo(db.parent, {
+  foreignKey: {
+    name: 'parent_id',
+    type: db.Sequelize.INTEGER,
+    allowNull: false
+  }
+});
+db.family.belongsTo(db.child, {
+  foreignKey: {
+    name: 'child_id',
     type: db.Sequelize.INTEGER,
     allowNull: false
   }

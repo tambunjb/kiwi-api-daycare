@@ -2,6 +2,7 @@ const db = require("../models");
 const User = db.user;
 const Op = db.Sequelize.Op;
 const Nanny = db.nanny;
+const Parent = db.parent;
 
 exports.register = async (req, res) => {
 
@@ -50,6 +51,66 @@ exports.login = async (req, res) => {
   User.findOne({ where: condition })
     .then(async (data) => {
       if(data) {
+        if(data.token != null)
+          condition.token = data.token;
+        
+        const token = await db.userToken(condition);
+        return User.update({token: token, last_login: require('moment')().format('YYYY-MM-DD HH:mm:ss')}, {where: { id: data.id }, silent: true})
+          .then(num => {
+            return User.scope('defaultScope', 'auth').findByPk(data.id).then(data => {
+              if(data) {
+                return res.send(data);
+              }
+            });
+          });
+      }
+      return res.status(400).send("Invalid Credentials");
+    }).catch(err => {
+      return res.status(500).send({
+        message:
+          err.message || "Some error occurred while logging the User."
+      });
+    });
+};
+
+exports.loginNanny = async (req, res) => {
+  let condition = {
+    phone: req.body.phone ?? null
+  };
+
+  User.findOne({ where: condition, include: Nanny })
+    .then(async (data) => {
+      if(data && data.nanny) {
+        if(data.token != null)
+          condition.token = data.token;
+        
+        const token = await db.userToken(condition);
+        return User.update({token: token, last_login: require('moment')().format('YYYY-MM-DD HH:mm:ss')}, {where: { id: data.id }, silent: true})
+          .then(num => {
+            return User.scope('defaultScope', 'auth').findByPk(data.id).then(data => {
+              if(data) {
+                return res.send(data);
+              }
+            });
+          });
+      }
+      return res.status(400).send("Invalid Credentials");
+    }).catch(err => {
+      return res.status(500).send({
+        message:
+          err.message || "Some error occurred while logging the User."
+      });
+    });
+};
+
+exports.loginParent = async (req, res) => {
+  let condition = {
+    phone: req.body.phone ?? null
+  };
+
+  User.findOne({ where: condition, include: Parent })
+    .then(async (data) => {
+      if(data && data.parent) {
         if(data.token != null)
           condition.token = data.token;
         

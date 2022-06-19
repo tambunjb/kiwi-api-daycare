@@ -1,6 +1,8 @@
 const db = require("../models");
 const Report = db.report;
 const User = db.user;
+const Parent = db.parent;
+const Family = db.family;
 const Nanny = db.nanny;
 const Child = db.child;
 const MilkSession = db.milkSession;
@@ -79,7 +81,7 @@ exports.setAbsent = async (req, res) => {
 
 }
 
-exports.getBySameNannyLocation = async (req, res) => {
+exports.getByParent = async (req, res) => {
   let condition = {};
 
   condition.where = {};
@@ -88,9 +90,22 @@ exports.getBySameNannyLocation = async (req, res) => {
       condition.where.date = { [Op.eq]: req.query.date }
     }
   }
-  const user = await User.findOne({where: {phone: req.user}, include: Nanny});
-  if(user.nanny){
-    condition.where.location_id = { [Op.eq]: user.nanny.location_id };
+  const user = await User.findOne({where: {phone: req.user}, include: Parent});
+  // child condition
+  const child_ids = []
+  if(user.parent){
+    const parent = await Parent.findOne({where: {id: user.parent.id}, include:  { model: Family, as: 'families' }});
+    if(parent.families){
+      parent.families.map(item => {
+        child_ids.push(item.child_id)
+      })
+      if(child_ids.length > 0)
+        condition.where.child_id = { [Op.or]: child_ids };
+    }
+  }
+  if(child_ids.length == 0) {
+    child_ids.push(-999)
+    condition.where.child_id = { [Op.or]: child_ids };
   }
 
   const { page, size } = req.query;
@@ -105,6 +120,55 @@ exports.getBySameNannyLocation = async (req, res) => {
     {model: Nanny},
     {model: Child}
   ];
+
+  condition.distinct = true
+  Report.findAndCountAll(condition)
+    .then(data => {
+      data.rows.forEach(row => {
+        row.setDataValue('nanny_name', row.nanny.name);
+        row.setDataValue('child_name', row.child.name);
+      })
+      const response = db.getPagingData(data, page, limit);
+      res.send(response);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving report."
+      });
+    });
+};
+
+exports.getBySameNannyLocation = async (req, res) => {
+  let condition = {};
+
+  condition.where = {};
+  if(req.query){
+    if(req.query.date){
+      condition.where.date = { [Op.eq]: req.query.date }
+    }
+  }
+  const user = await User.findOne({where: {phone: req.user}, include: Nanny});
+  if(user.nanny){
+    condition.where.location_id = { [Op.eq]: user.nanny.location_id };
+  } else {
+    condition.where.location_id = { [Op.eq]: -999 };
+  }
+
+  const { page, size } = req.query;
+  const { limit, offset } = db.getPagination(page, size);
+  if(offset >= 0){
+    condition.limit = limit;
+    condition.offset = offset;
+  }
+
+  condition.include = [
+    {model: MilkSession},
+    {model: Nanny},
+    {model: Child}
+  ];
+
+  condition.distinct = true
   Report.findAndCountAll(condition)
     .then(data => {
       data.rows.forEach(row => {

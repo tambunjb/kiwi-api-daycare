@@ -6,12 +6,14 @@ module.exports = app => {
 
   const user = require("../controllers/user.controller.js");
   const nanny = require("../controllers/nanny.controller.js");
+  const parent = require("../controllers/parent.controller.js");
   const child = require("../controllers/child.controller.js");
   const location = require("../controllers/location.controller.js");
   const report = require("../controllers/report.controller.js");
   const milkSession = require("../controllers/milkSession.controller.js");
   const mealConfig = require("../controllers/mealConfig.controller.js");
   const mapping = require("../controllers/mapping.controller.js");
+  const family = require("../controllers/family.controller.js");
   const config = require("../controllers/config.controller.js");
 
   function postTrimmer(req, res, next) {
@@ -33,10 +35,15 @@ module.exports = app => {
   });
   router.post("/register", user.register);
   router.post("/login", user.login);
+  router.post("/login-nanny", user.loginNanny);
+  router.post("/login-parent", user.loginParent);
 
   router.use('/nanny', auth);
   router.post("/nanny/register", nanny.register);
   router.get("/nanny/get-by-same-location", nanny.getBySameLocation);
+
+  router.use('/parent', auth);
+  router.post("/parent/register", parent.register);
 
   router.use('/child', auth);
   router.get("/child/get-by-same-location", child.getBySameLocation);
@@ -44,6 +51,7 @@ module.exports = app => {
   router.use('/report', auth);
   router.get("/report/get-by-same-nanny-location", report.getBySameNannyLocation);
   router.post("/report/set-absent/:id", report.setAbsent);
+  router.get("/report/get-by-parent", report.getByParent);
 
   router.use('/meal-config', auth);
   router.post("/meal-config/set-by-location/:location_id", mealConfig.setByLocation);
@@ -86,6 +94,19 @@ module.exports = app => {
   router.get("/location/view/:id", location.view);
   router.post("/location/edit/:id", location.edit);
   router.post("/location/del/:id", location.del);
+
+  //router.post("/parent/add", parent.add);
+  router.get("/parent", parent.index);
+  router.get("/parent/view/:id", parent.view);
+  router.post("/parent/edit/:id", parent.edit);
+  router.post("/parent/del/:id", parent.del);
+
+  router.use('/family', auth);
+  router.post("/family/add", family.add);
+  router.get("/family", family.index);
+  router.get("/family/view/:id", family.view);
+  router.post("/family/edit/:id", family.edit);
+  router.post("/family/del/:id", family.del);
 
   router.post("/report/add", report.add);
   router.get("/report", report.index);
