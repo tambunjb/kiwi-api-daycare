@@ -1,8 +1,11 @@
 module.exports = (sequelize, Sequelize) => {
-  const Parent = sequelize.define("parent", {
+  const Guardian = sequelize.define("guardian", {
     name: {
       type: Sequelize.STRING,
       allowNull: false
+    },
+    role: {
+      type: Sequelize.STRING
     },
     deleted_at: {
       type: Sequelize.DATE
@@ -28,5 +31,5 @@ module.exports = (sequelize, Sequelize) => {
     }
   });
 
-  return Parent;
+  return Guardian;
 };

@@ -1,6 +1,6 @@
 const db = require("../models");
 const Family = db.family;
-const Parent = db.parent;
+const Guardian = db.guardian;
 const Child = db.child;
 const Op = db.Sequelize.Op;
 
@@ -14,7 +14,7 @@ exports.add = (req, res, next) => {
   }
 
   const family = {
-    parent_id: req.body.parent_id ?? null,
+    guardian_id: req.body.guardian_id ?? null,
     child_id: req.body.child_id ?? null,
     created_by: req.user
   };
@@ -36,8 +36,8 @@ exports.index = (req, res) => {
 
   condition.where = {};
   if(req.query){
-  	if(req.query.parent_id){
-  		condition.where.parent_id = { [Op.eq]: req.query.parent_id }
+  	if(req.query.guardian_id){
+  		condition.where.guardian_id = { [Op.eq]: req.query.guardian_id }
   	}
   	if(req.query.child_id){
       condition.where.child_id = { [Op.eq]: req.query.child_id }

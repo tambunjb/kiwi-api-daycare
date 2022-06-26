@@ -1,11 +1,12 @@
 const db = require("../models");
 const Report = db.report;
 const User = db.user;
-const Parent = db.parent;
+const Guardian = db.guardian;
 const Family = db.family;
 const Nanny = db.nanny;
 const Child = db.child;
 const MilkSession = db.milkSession;
+const Location = db.location;
 const Op = db.Sequelize.Op;
 
 exports.setAbsent = async (req, res) => {
@@ -81,22 +82,30 @@ exports.setAbsent = async (req, res) => {
 
 }
 
-exports.getByParent = async (req, res) => {
+exports.getByGuardian = async (req, res) => {
   let condition = {};
 
   condition.where = {};
   if(req.query){
     if(req.query.date){
-      condition.where.date = { [Op.eq]: req.query.date }
+      const d_month = req.query.date.split('-')[1]
+      const d_year = req.query.date.split('-')[0]
+      const d_first = new Date(d_year, parseInt(d_month)-1, 1);
+      const d_end = new Date(d_year, parseInt(d_month), 0);
+      condition.where.date = { [Op.and]: [
+        { [Op.gte]: d_first },
+        { [Op.lte]: d_end }
+      ] }
     }
   }
-  const user = await User.findOne({where: {phone: req.user}, include: Parent});
+
+  const user = await User.findOne({where: {phone: req.user}, include: Guardian});
   // child condition
   const child_ids = []
-  if(user.parent){
-    const parent = await Parent.findOne({where: {id: user.parent.id}, include:  { model: Family, as: 'families' }});
-    if(parent.families){
-      parent.families.map(item => {
+  if(user.guardian){
+    const guardian = await Guardian.findOne({where: {id: user.guardian.id}, include:  { model: Family, as: 'families' }});
+    if(guardian.families){
+      guardian.families.map(item => {
         child_ids.push(item.child_id)
       })
       if(child_ids.length > 0)
@@ -118,7 +127,8 @@ exports.getByParent = async (req, res) => {
   condition.include = [
     {model: MilkSession},
     {model: Nanny},
-    {model: Child}
+    {model: Child},
+    {model: Location}
   ];
 
   condition.distinct = true
@@ -127,6 +137,7 @@ exports.getByParent = async (req, res) => {
       data.rows.forEach(row => {
         row.setDataValue('nanny_name', row.nanny.name);
         row.setDataValue('child_name', row.child.name);
+        row.setDataValue('location_name', row.location.name);
       })
       const response = db.getPagingData(data, page, limit);
       res.send(response);

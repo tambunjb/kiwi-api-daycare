@@ -6,7 +6,7 @@ module.exports = app => {
 
   const user = require("../controllers/user.controller.js");
   const nanny = require("../controllers/nanny.controller.js");
-  const parent = require("../controllers/parent.controller.js");
+  const guardian = require("../controllers/guardian.controller.js");
   const child = require("../controllers/child.controller.js");
   const location = require("../controllers/location.controller.js");
   const report = require("../controllers/report.controller.js");
@@ -36,14 +36,14 @@ module.exports = app => {
   router.post("/register", user.register);
   router.post("/login", user.login);
   router.post("/login-nanny", user.loginNanny);
-  router.post("/login-parent", user.loginParent);
+  router.post("/login-guardian", user.loginGuardian);
 
   router.use('/nanny', auth);
   router.post("/nanny/register", nanny.register);
   router.get("/nanny/get-by-same-location", nanny.getBySameLocation);
 
-  router.use('/parent', auth);
-  router.post("/parent/register", parent.register);
+  router.use('/guardian', auth);
+  router.post("/guardian/register", guardian.register);
 
   router.use('/child', auth);
   router.get("/child/get-by-same-location", child.getBySameLocation);
@@ -51,7 +51,7 @@ module.exports = app => {
   router.use('/report', auth);
   router.get("/report/get-by-same-nanny-location", report.getBySameNannyLocation);
   router.post("/report/set-absent/:id", report.setAbsent);
-  router.get("/report/get-by-parent", report.getByParent);
+  router.get("/report/get-by-guardian", report.getByGuardian);
 
   router.use('/meal-config', auth);
   router.post("/meal-config/set-by-location/:location_id", mealConfig.setByLocation);
@@ -95,11 +95,11 @@ module.exports = app => {
   router.post("/location/edit/:id", location.edit);
   router.post("/location/del/:id", location.del);
 
-  //router.post("/parent/add", parent.add);
-  router.get("/parent", parent.index);
-  router.get("/parent/view/:id", parent.view);
-  router.post("/parent/edit/:id", parent.edit);
-  router.post("/parent/del/:id", parent.del);
+  //router.post("/guardian/add", guardian.add);
+  router.get("/guardian", guardian.index);
+  router.get("/guardian/view/:id", guardian.view);
+  router.post("/guardian/edit/:id", guardian.edit);
+  router.post("/guardian/del/:id", guardian.del);
 
   router.use('/family', auth);
   router.post("/family/add", family.add);

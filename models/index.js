@@ -22,14 +22,14 @@ db.report = require("./report.model.js")(db.sequelize, db.Sequelize);
 db.milkSession = require("./milkSession.model.js")(db.sequelize, db.Sequelize);
 db.mealConfig = require("./mealConfig.model.js")(db.sequelize, db.Sequelize);
 db.mapping = require("./mapping.model.js")(db.sequelize, db.Sequelize);
-db.parent = require("./parent.model.js")(db.sequelize, db.Sequelize);
+db.guardian = require("./guardian.model.js")(db.sequelize, db.Sequelize);
 db.family = require("./family.model.js")(db.sequelize, db.Sequelize);
 
-// user - parent
-db.user.hasOne(db.parent, {
+// user - guardian
+db.user.hasOne(db.guardian, {
   foreignKey: 'user_id'
 });
-db.parent.belongsTo(db.user, {
+db.guardian.belongsTo(db.user, {
   foreignKey: {
     name: 'user_id',
     type: db.Sequelize.INTEGER,
@@ -62,15 +62,15 @@ db.mealConfig.belongsTo(db.location, {
 });
 
 // family
-db.parent.hasMany(db.family, {
-  foreignKey: 'parent_id'
+db.guardian.hasMany(db.family, {
+  foreignKey: 'guardian_id'
 });
 db.child.hasMany(db.family, {
   foreignKey: 'child_id'
 });
-db.family.belongsTo(db.parent, {
+db.family.belongsTo(db.guardian, {
   foreignKey: {
-    name: 'parent_id',
+    name: 'guardian_id',
     type: db.Sequelize.INTEGER,
     allowNull: false
   }

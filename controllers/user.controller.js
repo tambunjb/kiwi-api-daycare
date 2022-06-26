@@ -2,7 +2,7 @@ const db = require("../models");
 const User = db.user;
 const Op = db.Sequelize.Op;
 const Nanny = db.nanny;
-const Parent = db.parent;
+const Guardian = db.guardian;
 
 exports.register = async (req, res) => {
 
@@ -103,14 +103,14 @@ exports.loginNanny = async (req, res) => {
     });
 };
 
-exports.loginParent = async (req, res) => {
+exports.loginGuardian = async (req, res) => {
   let condition = {
     phone: req.body.phone ?? null
   };
 
-  User.findOne({ where: condition, include: Parent })
+  User.findOne({ where: condition, include: Guardian })
     .then(async (data) => {
-      if(data && data.parent) {
+      if(data && data.guardian) {
         if(data.token != null)
           condition.token = data.token;
         

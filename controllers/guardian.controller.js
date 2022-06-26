@@ -1,11 +1,11 @@
 const db = require("../models");
-const Parent = db.parent;
+const Guardian = db.guardian;
 const User = db.user;
 const Op = db.Sequelize.Op;
 
 exports.register = async (req, res) => {
   // Validate request
-  if (!(req.body && (req.body.phone && req.body.name))) {
+  if (!(req.body && (req.body.phone && req.body.name && req.body.role))) {
     return res.status(400).send({
       message: "Field(s) are missing."
     });
@@ -24,21 +24,22 @@ exports.register = async (req, res) => {
     created_by: req.user
   };
 
-  const parent = {
+  const guardian = {
     name: req.body.name,
+    role: req.body.role,
     created_by: req.user
   };
 
   return db.sequelize.transaction(function (t) {
     return User.create(user, {transaction: t}).then(function (user) {
-      return user.createParent(parent, {transaction: t});
+      return user.createGuardian(guardian, {transaction: t});
     });
   }).then(function (result) {
     return res.send({id: result.id});
   }).catch(function (err) {
     return res.status(500).send({
         message:
-          err.message || "Some error occurred while registering the Parent."
+          err.message || "Some error occurred while registering the Guardian."
       });
   });
 };
@@ -51,20 +52,21 @@ exports.add = (req, res) => {
     });
   }
 
-  const parent = {
+  const guardian = {
     user_id: req.body.user_id ?? null,
     name: req.body.name ?? null,
+    role: req.body.role ?? null,
     created_by: req.user
   };
   
-  Parent.create(parent)
+  Guardian.create(guardian)
     .then(data => {
       res.send({id: data.id});
     })
     .catch(err => {
       res.status(500).send({
         message:
-          err.message || "Some error occurred while creating the Parent."
+          err.message || "Some error occurred while creating the Guardian."
       });
     });
 };
@@ -80,6 +82,9 @@ exports.index = (req, res) => {
     if(req.query.name){
   		condition.where.name = { [Op.like]: `%${req.query.name}%` }
   	}
+    if(req.query.role){
+      condition.where.role = { [Op.like]: `%${req.query.role}%` }
+    }
   }
 
   const { page, size } = req.query;
@@ -89,7 +94,7 @@ exports.index = (req, res) => {
     condition.offset = offset;
   }
 
-  Parent.findAndCountAll(condition)
+  Guardian.findAndCountAll(condition)
     .then(data => {
       const response = db.getPagingData(data, page, limit);
       res.send(response);
@@ -97,26 +102,26 @@ exports.index = (req, res) => {
     .catch(err => {
       res.status(500).send({
         message:
-          err.message || "Some error occurred while retrieving parent."
+          err.message || "Some error occurred while retrieving guardian."
       });
     });
 };
 
 exports.view = (req, res) => {
   const id = req.params.id;
-  Parent.findByPk(id)
+  Guardian.findByPk(id)
     .then(data => {
       if (data) {
         res.send(data);
       } else {
         res.status(404).send({
-          message: `Cannot find Parent with id=${id}.`
+          message: `Cannot find Guardian with id=${id}.`
         });
       }
     })
     .catch(err => {
       res.status(500).send({
-        message: err.message || "Error retrieving Parent with id="+id
+        message: err.message || "Error retrieving Guardian with id="+id
       });
     });
 };
@@ -124,7 +129,7 @@ exports.view = (req, res) => {
 exports.edit = (req, res) => {
   const id = req.params.id;
   req.body.updated_by = req.user;
-  Parent.update(req.body, {
+  Guardian.update(req.body, {
     where: { id: id }
   })
     .then(num => {
@@ -132,13 +137,13 @@ exports.edit = (req, res) => {
         res.send({id: id});
       } else {
         res.status(404).send({
-          message: `Cannot update Parent with id=${id}. Maybe Parent was not found or req.body is empty!`
+          message: `Cannot update Guardian with id=${id}. Maybe Guardian was not found or req.body is empty!`
         });
       }
     })
     .catch(err => {
       res.status(500).send({
-        message: err.message || "Error updating Parent with id="+id
+        message: err.message || "Error updating Guardian with id="+id
       });
     });
 };
@@ -146,15 +151,15 @@ exports.edit = (req, res) => {
 exports.del = (req, res) => {
   const id = req.params.id;
 
-  Parent.update({deleted_by: req.user}, {where: {id: id}, silent: true})
+  Guardian.update({deleted_by: req.user}, {where: {id: id}, silent: true})
     .then(num => {
-      Parent.destroy({where: { id: id }})
+      Guardian.destroy({where: { id: id }})
         .then(function(){
           res.send({ id: id });
       });
     }).catch(err => {
       res.status(500).send({
-        message: err.message || "Could not delete Parent with id="+id
+        message: err.message || "Could not delete Guardian with id="+id
         });
     });
 };
