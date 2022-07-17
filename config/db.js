@@ -2,6 +2,14 @@ require('dotenv').config();
 const Sequelize = require("sequelize");
 const jwt = require('jsonwebtoken');
 
+var firebase_admin = require("firebase-admin");
+var serviceAccount = require('../kiwi-app-parent-firebase-adminsdk-w1w4z-9afd55f6ab.json');
+firebase_admin.initializeApp({
+    credential: firebase_admin.credential.cert(serviceAccount),
+});
+const firebase_messaging = firebase_admin.messaging()
+
+
 const sequelize = new Sequelize(process.env.DB, process.env.USER, process.env.PASSWORD, {
   host: process.env.HOST,
   dialect: process.env.DIALECT,
@@ -61,5 +69,13 @@ db.userToken = (obj) => {
   }
 }
 
+db.sendMessage = (msg) => {
+  firebase_messaging.send(msg).then((response) => {
+    console.log("Firebase message with", msg.topic, "topic successfully sent: ", response)
+  })
+  .catch((error) => {
+    console.log("Firebase message send failed: ", error)
+  });
+}
 
 module.exports = db;

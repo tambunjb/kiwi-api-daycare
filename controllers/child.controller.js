@@ -42,6 +42,7 @@ exports.add = (req, res, next) => {
 
   const child = {
     name: req.body.name ?? null,
+    nickname: req.body.nickname ?? null,
     location_id: req.body.location_id ?? null,
     gender: req.body.gender ?? null,
     date_of_birth: req.body.date_of_birth ?? null,
@@ -68,6 +69,9 @@ exports.index = (req, res) => {
   	if(req.query.name){
   		condition.where.name = { [Op.like]: `%${req.query.name}%` }
   	}
+    if(req.query.nickname){
+      condition.where.nickname = { [Op.like]: `%${req.query.nickname}%` }
+    }
     if(req.query.location_id){
       condition.where.location_id = { [Op.eq]: req.query.location_id }
     }

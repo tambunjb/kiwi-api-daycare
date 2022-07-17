@@ -8,6 +8,9 @@ const Child = db.child;
 const MilkSession = db.milkSession;
 const Location = db.location;
 const Op = db.Sequelize.Op;
+const notif_day_of_week = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+const notif_month_name = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+
 
 exports.setAbsent = async (req, res) => {
   const id = req.params.id;
@@ -16,6 +19,7 @@ exports.setAbsent = async (req, res) => {
     attendance: 0,
     updated_by: req.user,
     arrival_time: null,
+    is_ready_to_share: 0,
     shared_at: null,
     child_feeling: null,
     temperature: null,
@@ -92,10 +96,23 @@ exports.getByGuardian = async (req, res) => {
       const d_year = req.query.date.split('-')[0]
       const d_first = new Date(d_year, parseInt(d_month)-1, 1);
       const d_end = new Date(d_year, parseInt(d_month), 0);
-      condition.where.date = { [Op.and]: [
-        { [Op.gte]: d_first },
-        { [Op.lte]: d_end }
-      ] }
+      
+      condition.where = {
+        date: { [Op.and]: [
+            { [Op.gte]: d_first },
+            { [Op.lte]: d_end }
+        ] },
+        [Op.or]: [
+            {
+                is_ready_to_share: 1
+            }, 
+            {
+                shared_at: {
+                  [Op.not]: null
+                }
+            }
+        ]
+      }
     }
   }
 
@@ -213,6 +230,7 @@ exports.add = async (req, res, next) => {
     child_id: req.body.child_id ?? null,
     location_id: user.nanny.location_id ?? null,
     date: req.body.date ?? null,
+    is_ready_to_share: req.body.is_ready_to_share ?? 0,
     shared_at: req.body.shared_at ?? null,
     attendance: req.body.attendance ?? null,
     arrival_time: req.body.arrival_time ?? null,
@@ -258,6 +276,27 @@ exports.add = async (req, res, next) => {
   
   Report.create(report)
     .then(data => {
+
+      if(data.is_ready_to_share == 1 || data.shared_at != null) {
+        Child.findByPk(data.child_id).then(data_child => {
+          const notif_name = data_child.nickname ?? data_child.name
+          const notif_date = new Date(data.date).getDate()
+          const notif_day = notif_day_of_week[new Date(data.date).getDay()]
+          const notif_month = notif_month_name[new Date(data.date).getMonth()]
+          const firebase_msg = {
+            topic: `kidparent_childid_${data_child.id}`,
+            data: {
+              topic: `kidparent_childid_${data_child.id}`,
+              report_id: `${data.id}`,
+              title: `Daily Report ${notif_name} siap dibaca~`,
+              body: `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+            }
+          };
+
+          db.sendMessage(firebase_msg)
+        })
+      }
+
       res.send({id: data.id});
     })
     .catch(err => {
@@ -449,14 +488,46 @@ exports.view = (req, res) => {
     });
 };
 
-exports.edit = (req, res) => {
+exports.edit = async (req, res) => {
   const id = req.params.id;
   req.body.updated_by = req.user;
+  const report_old = await Report.findOne({where: {id: id}})
+
   Report.update(req.body, {
     where: { id: id }
   })
     .then(num => {
       if (num == 1) {
+
+        Report.findOne({where: {id: id}, include: Child}).then(data_report => {
+
+          if(data_report.is_ready_to_share == 1 || data_report.shared_at != null) {
+            
+            const notif_name = data_report.child.nickname ?? data_report.child.name
+            const notif_date = new Date(data_report.date).getDate()
+            const notif_day = notif_day_of_week[new Date(data_report.date).getDay()]
+            const notif_month = notif_month_name[new Date(data_report.date).getMonth()]
+            const firebase_msg = {
+              topic: `kidparent_childid_${data_report.child_id}`,
+              data: {
+                topic: `kidparent_childid_${data_report.child_id}`,
+                report_id: `${data_report.id}`
+              }
+            };
+
+            if(report_old.is_ready_to_share==0 && data_report.is_ready_to_share==1) {
+              firebase_msg.data.title = `Daily Report ${notif_name} siap dibaca~`
+              firebase_msg.data.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+            } else {
+              firebase_msg.data.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
+              firebase_msg.data.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
+            }
+
+            db.sendMessage(firebase_msg)
+          }
+
+        })
+
         res.send({id: id});
       } else {
         res.status(404).send({

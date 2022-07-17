@@ -9,6 +9,9 @@ module.exports = (sequelize, Sequelize) => {
           return this.getDataValue('shared_at')!=null/* && !isNaN(this.getDataValue('shared_at'))*/?require('moment')(this.getDataValue('shared_at')).format('YYYY-MM-DD HH:mm:ss'):null;
       }
     },
+    is_ready_to_share: {
+      type: Sequelize.INTEGER
+    },
     attendance: {
       type: Sequelize.INTEGER
     },

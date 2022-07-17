@@ -3,6 +3,7 @@ const User = db.user;
 const Op = db.Sequelize.Op;
 const Nanny = db.nanny;
 const Guardian = db.guardian;
+const Family = db.family;
 
 exports.register = async (req, res) => {
 
@@ -117,9 +118,16 @@ exports.loginGuardian = async (req, res) => {
         const token = await db.userToken(condition);
         return User.update({token: token, last_login: require('moment')().format('YYYY-MM-DD HH:mm:ss')}, {where: { id: data.id }, silent: true})
           .then(num => {
-            return User.scope('defaultScope', 'auth').findByPk(data.id).then(data => {
-              if(data) {
-                return res.send(data);
+            return User.scope('defaultScope', 'auth').findByPk(data.id).then(res_user => {
+              if(res_user) {
+
+                return Family.findAll({where:{guardian_id: data.guardian.id}}).then(families => {
+                    const arr_childid = []
+                    families.map(item => arr_childid.push(`kidparent_childid_${item.child_id}`))
+                    res_user.dataValues.child_subscribes = JSON.stringify(arr_childid)
+
+                    return res.send(res_user);
+                  })
               }
             });
           });

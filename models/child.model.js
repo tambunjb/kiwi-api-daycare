@@ -4,6 +4,9 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false
     },
+    nickname: {
+      type: Sequelize.STRING
+    },
     location_id: {
       type: Sequelize.INTEGER,
       allowNull: false
