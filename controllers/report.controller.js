@@ -285,11 +285,26 @@ exports.add = async (req, res, next) => {
           const notif_month = notif_month_name[new Date(data.date).getMonth()]
           const firebase_msg = {
             topic: `kidparent_childid_${data_child.id}`,
-            data: {
-              topic: `kidparent_childid_${data_child.id}`,
-              report_id: `${data.id}`,
+            notification: {
               title: `Daily Report ${notif_name} siap dibaca~`,
-              body: `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+              body: `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`,
+            },
+            data: {
+              // topic: `kidparent_childid_${data_child.id}`,
+              report_id: `${data.id}`,
+              // title: `Daily Report ${notif_name} siap dibaca~`,
+              // body: `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+            },
+            android: {
+              priority: 'high',
+              notification: {
+                channel_id: 'kidparent_importance_channel'
+              }
+            },
+            apns: {
+              headers: {
+                'apns-priority': '10'
+              }
             }
           };
 
@@ -509,18 +524,34 @@ exports.edit = async (req, res) => {
             const notif_month = notif_month_name[new Date(data_report.date).getMonth()]
             const firebase_msg = {
               topic: `kidparent_childid_${data_report.child_id}`,
+              notification: {},
               data: {
-                topic: `kidparent_childid_${data_report.child_id}`,
+                // topic: `kidparent_childid_${data_report.child_id}`,
                 report_id: `${data_report.id}`
+              },
+              android: {
+                priority: 'high',
+                notification: {
+                  channel_id: 'kidparent_importance_channel'
+                }
+              },
+              apns: {
+                headers: {
+                  'apns-priority': '10'
+                }
               }
             };
 
             if(report_old.is_ready_to_share==0 && data_report.is_ready_to_share==1) {
-              firebase_msg.data.title = `Daily Report ${notif_name} siap dibaca~`
-              firebase_msg.data.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+              // firebase_msg.data.title = `Daily Report ${notif_name} siap dibaca~`
+              // firebase_msg.data.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+              firebase_msg.notification.title = `Daily Report ${notif_name} siap dibaca~`
+              firebase_msg.notification.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
             } else {
-              firebase_msg.data.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
-              firebase_msg.data.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
+              // firebase_msg.data.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
+              // firebase_msg.data.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
+              firebase_msg.notification.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
+              firebase_msg.notification.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
             }
 
             db.sendMessage(firebase_msg)
