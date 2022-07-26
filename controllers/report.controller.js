@@ -292,6 +292,7 @@ exports.add = async (req, res, next) => {
             data: {
               // topic: `kidparent_childid_${data_child.id}`,
               report_id: `${data.id}`,
+              status: 'new'
               // title: `Daily Report ${notif_name} siap dibaca~`,
               // body: `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
             },
@@ -547,11 +548,13 @@ exports.edit = async (req, res) => {
               // firebase_msg.data.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
               firebase_msg.notification.title = `Daily Report ${notif_name} siap dibaca~`
               firebase_msg.notification.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+              firebase_msg.data.status = 'new'
             } else {
               // firebase_msg.data.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
               // firebase_msg.data.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
               firebase_msg.notification.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
               firebase_msg.notification.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
+              firebase_msg.data.status = 'update'
             }
 
             db.sendMessage(firebase_msg)
