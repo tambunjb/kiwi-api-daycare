@@ -2,6 +2,56 @@ const db = require("../models");
 const Config = db.config;
 const Op = db.Sequelize.Op;
 
+exports.getRatingLabelsItems = (req, res) => {
+  const appid = req.query.appid;
+  
+  if (!appid) {
+    return res.status(400).send({
+      message: "Invalid params!"
+    });
+  }
+
+  const name_label = `${appid}_rating_labels`
+  const name_item = `${appid}_rating_items`
+
+  let condition = {};
+  condition.where = { name: {
+    [Op.or]: [
+      name_label,
+      `${name_item}_0`,
+      `${name_item}_1`,
+      `${name_item}_2`,
+      `${name_item}_3`,
+      `${name_item}_4`,
+      `${name_item}_5`
+    ]
+  } }
+
+  Config.findAll(condition)
+    .then(data => {
+      let newData = {};
+      
+      data.forEach(row => {
+        newData[row.name.split(`${appid}_rating_`)[1]] = row.value
+      })
+
+      if(!newData.labels) {
+        newData.labels = 'sangat tidak puas,tidak puas,biasa saja,puas,sangat puas'
+      }
+      if(!newData.items_0) {
+        newData.items_0 = 'suster,makanan,kondisi fasilitas,kegiatan,aplikasi,lainnya'
+      }
+
+      res.send(newData)
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving config."
+      });
+    });
+};
+
 exports.setReportRequiredFields = (req, res, next) => {
   const appid = req.body.appid ?? null
   const fields = req.body.fields ?? null

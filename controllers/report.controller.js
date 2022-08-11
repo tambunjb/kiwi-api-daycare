@@ -7,6 +7,7 @@ const Nanny = db.nanny;
 const Child = db.child;
 const MilkSession = db.milkSession;
 const Location = db.location;
+const Rating = db.rating;
 const Op = db.Sequelize.Op;
 const notif_day_of_week = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 const notif_month_name = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
@@ -116,6 +117,8 @@ exports.getByGuardian = async (req, res) => {
     }
   }
 
+  let include_rating = {model: Rating}
+
   const user = await User.findOne({where: {phone: req.user}, include: Guardian});
   // child condition
   const child_ids = []
@@ -127,6 +130,12 @@ exports.getByGuardian = async (req, res) => {
       })
       if(child_ids.length > 0)
         condition.where.child_id = { [Op.or]: child_ids };
+    }
+
+    include_rating = {
+      model: Rating,
+      where: {guardian_id: guardian.id},
+      required: false
     }
   }
   if(child_ids.length == 0) {
@@ -145,7 +154,8 @@ exports.getByGuardian = async (req, res) => {
     {model: MilkSession},
     {model: Nanny},
     {model: Child},
-    {model: Location}
+    {model: Location},
+    include_rating
   ];
 
   condition.distinct = true
@@ -154,7 +164,11 @@ exports.getByGuardian = async (req, res) => {
       data.rows.forEach(row => {
         row.setDataValue('nanny_name', row.nanny.name);
         row.setDataValue('child_name', row.child.name);
+        row.setDataValue('nickname', row.child.nickname ?? row.child.name)
         row.setDataValue('location_name', row.location.name);
+        row.setDataValue('is_submit_rating', (row.ratings[0] && row.ratings[0].is_submit) ? row.ratings[0].is_submit : 0);
+        row.setDataValue('rating', (row.ratings[0] && row.ratings[0].rating) ? row.ratings[0].rating : 0);
+        row.setDataValue('rating_id', (row.ratings[0] && row.ratings[0].id) ? row.ratings[0].id : 0);
       })
       const response = db.getPagingData(data, page, limit);
       res.send(response);

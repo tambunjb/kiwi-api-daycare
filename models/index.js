@@ -24,6 +24,29 @@ db.mealConfig = require("./mealConfig.model.js")(db.sequelize, db.Sequelize);
 db.mapping = require("./mapping.model.js")(db.sequelize, db.Sequelize);
 db.guardian = require("./guardian.model.js")(db.sequelize, db.Sequelize);
 db.family = require("./family.model.js")(db.sequelize, db.Sequelize);
+db.rating = require("./rating.model.js")(db.sequelize, db.Sequelize);
+
+// rating
+db.guardian.hasMany(db.rating, {
+  foreignKey: 'guardian_id'
+});
+db.report.hasMany(db.rating, {
+  foreignKey: 'report_id'
+});
+db.rating.belongsTo(db.guardian, {
+  foreignKey: {
+    name: 'guardian_id',
+    type: db.Sequelize.INTEGER,
+    allowNull: false
+  }
+});
+db.rating.belongsTo(db.report, {
+  foreignKey: {
+    name: 'report_id',
+    type: db.Sequelize.INTEGER,
+    allowNull: false
+  }
+});
 
 // user - guardian
 db.user.hasOne(db.guardian, {

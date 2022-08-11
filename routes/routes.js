@@ -14,6 +14,7 @@ module.exports = app => {
   const mealConfig = require("../controllers/mealConfig.controller.js");
   const mapping = require("../controllers/mapping.controller.js");
   const family = require("../controllers/family.controller.js");
+  const rating = require("../controllers/rating.controller.js");
   const config = require("../controllers/config.controller.js");
 
   function postTrimmer(req, res, next) {
@@ -68,6 +69,7 @@ module.exports = app => {
   router.post("/config/set-version-update", config.setVersionUpdate);
   router.get("/config/get-report-required-fields", config.getReportRequiredFields);
   router.post("/config/set-report-required-fields", config.setReportRequiredFields);
+  router.get("/config/get-rating-labels-items", config.getRatingLabelsItems);
 
   router.use('/user', auth);
   router.post("/user/add", user.add);
@@ -107,6 +109,13 @@ module.exports = app => {
   router.get("/family/view/:id", family.view);
   router.post("/family/edit/:id", family.edit);
   router.post("/family/del/:id", family.del);
+
+  router.use('/rating', auth);
+  router.post("/rating/add", rating.add);
+  router.get("/rating", rating.index);
+  router.get("/rating/view/:id", rating.view);
+  router.post("/rating/edit/:id", rating.edit);
+  router.post("/rating/del/:id", rating.del);
 
   router.post("/report/add", report.add);
   router.get("/report", report.index);
