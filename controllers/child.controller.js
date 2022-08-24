@@ -46,6 +46,7 @@ exports.add = (req, res, next) => {
     location_id: req.body.location_id ?? null,
     gender: req.body.gender ?? null,
     date_of_birth: req.body.date_of_birth ?? null,
+    is_active: req.body.is_active ?? 1,
     created_by: req.user
   };
   
@@ -81,6 +82,9 @@ exports.index = (req, res) => {
   	if(req.query.date_of_birth){
   		condition.where.date_of_birth = { [Op.like]: `%${req.query.date_of_birth}%` }
   	}
+    if(req.query.is_active){
+      condition.where.is_active = { [Op.eq]: req.query.is_active }
+    }
   }
 
   const { page, size } = req.query;

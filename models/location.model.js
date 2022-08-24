@@ -11,6 +11,9 @@ module.exports = (sequelize, Sequelize) => {
     desc: {
       type: Sequelize.STRING
     },
+    is_active: {
+      type: Sequelize.INTEGER
+    },
     deleted_at: {
       type: Sequelize.DATE
     },

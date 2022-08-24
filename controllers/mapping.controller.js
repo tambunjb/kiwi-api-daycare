@@ -149,6 +149,7 @@ exports.getByLocation = (req, res, next) => {
             nanny_name: mapping.nanny.name,
             child_id: mapping.child_id,
             child_name: mapping.child.name,
+            child_nickname: mapping.child.nickname ?? mapping.child.name
           }
         })
         res.send(data);
@@ -168,6 +169,7 @@ exports.getBySameNannyLocation = async (req, res) => {
   const user = await User.findOne({where: {phone: req.user}, include: Nanny});
   if(user.nanny){
     sub_condition.location_id = { [Op.eq]: user.nanny.location_id };
+    sub_condition.is_active = { [Op.eq]: 1 };
   }
 
   let condition = {};
@@ -195,6 +197,7 @@ exports.getBySameNannyLocation = async (req, res) => {
           nanny_name: mapping.nanny.name,
           child_id: mapping.child_id,
           child_name: mapping.child.name,
+          child_nickname: mapping.child.nickname ?? mapping.child.name,
           location_id: user.nanny.location_id
         }
       })

@@ -20,7 +20,7 @@ exports.setAbsent = async (req, res) => {
     attendance: 0,
     updated_by: req.user,
     arrival_time: null,
-    is_ready_to_share: 0,
+    // is_ready_to_share: 0,
     shared_at: null,
     child_feeling: null,
     temperature: null,
@@ -87,6 +87,74 @@ exports.setAbsent = async (req, res) => {
 
 }
 
+exports.sendNotif = async (req, res) => {
+  const id = req.params.id;
+
+  Report.findOne({where: {id: id}, include: Child})
+    .then(async (data) => {
+
+      const notif_name = data.child.nickname ?? data.child.name
+      const notif_date = new Date(data.date).getDate()
+      const notif_day = notif_day_of_week[new Date(data.date).getDay()]
+      const notif_month = notif_month_name[new Date(data.date).getMonth()]
+      const firebase_msg = {
+        topic: `kidparent_childid_${data.child_id}`,
+        notification: {},
+        data: {
+          report_id: `${data.id}`
+        },
+        android: {
+          priority: 'high',
+          notification: {
+            channel_id: 'kidparent_importance_channel'
+          }
+        },
+        apns: {
+          headers: {
+            'apns-priority': '10'
+          }
+        }
+      };
+
+      if (data.is_ready_to_share == 0) {
+        
+        const body = {}
+        body.is_ready_to_share = 1;
+        body.updated_by = req.user;
+        await Report.update(body, {
+          where: { id: id }
+        })
+          .then(num => {
+            if (num == 1) {
+                  
+              firebase_msg.notification.title = `Daily Report ${notif_name} siap dibaca~`
+              firebase_msg.notification.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+              firebase_msg.data.status = 'new'  
+
+            } else {
+              res.status(404).send({
+                message: `Cannot update Report with id=${id}. Maybe Report was not found!`
+              });
+            }
+          })
+
+      } else {
+        firebase_msg.notification.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
+        firebase_msg.notification.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
+        firebase_msg.data.status = 'update'
+      }
+
+      db.sendMessage(firebase_msg)
+
+      res.send({id: id});
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: err.message || "Error retrieving Report with id="+id
+      });
+    });
+}
+
 exports.getByGuardian = async (req, res) => {
   let condition = {};
 
@@ -103,16 +171,16 @@ exports.getByGuardian = async (req, res) => {
             { [Op.gte]: d_first },
             { [Op.lte]: d_end }
         ] },
-        [Op.or]: [
-            {
+        // [Op.or]: [
+        //     {
                 is_ready_to_share: 1
-            }, 
-            {
-                shared_at: {
-                  [Op.not]: null
-                }
-            }
-        ]
+        //     }, 
+        //     {
+        //         shared_at: {
+        //           [Op.not]: null
+        //         }
+        //     }
+        // ]
       }
     }
   }
@@ -216,6 +284,7 @@ exports.getBySameNannyLocation = async (req, res) => {
       data.rows.forEach(row => {
         row.setDataValue('nanny_name', row.nanny.name);
         row.setDataValue('child_name', row.child.name);
+        row.setDataValue('child_nickname', row.child.nickname ?? row.child.name)
       })
       const response = db.getPagingData(data, page, limit);
       res.send(response);
@@ -291,41 +360,41 @@ exports.add = async (req, res, next) => {
   Report.create(report)
     .then(data => {
 
-      if(data.is_ready_to_share == 1 || data.shared_at != null) {
-        Child.findByPk(data.child_id).then(data_child => {
-          const notif_name = data_child.nickname ?? data_child.name
-          const notif_date = new Date(data.date).getDate()
-          const notif_day = notif_day_of_week[new Date(data.date).getDay()]
-          const notif_month = notif_month_name[new Date(data.date).getMonth()]
-          const firebase_msg = {
-            topic: `kidparent_childid_${data_child.id}`,
-            notification: {
-              title: `Daily Report ${notif_name} siap dibaca~`,
-              body: `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`,
-            },
-            data: {
-              // topic: `kidparent_childid_${data_child.id}`,
-              report_id: `${data.id}`,
-              status: 'new'
-              // title: `Daily Report ${notif_name} siap dibaca~`,
-              // body: `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
-            },
-            android: {
-              priority: 'high',
-              notification: {
-                channel_id: 'kidparent_importance_channel'
-              }
-            },
-            apns: {
-              headers: {
-                'apns-priority': '10'
-              }
-            }
-          };
+      // if(data.is_ready_to_share == 1 || data.shared_at != null) {
+      //   Child.findByPk(data.child_id).then(data_child => {
+      //     const notif_name = data_child.nickname ?? data_child.name
+      //     const notif_date = new Date(data.date).getDate()
+      //     const notif_day = notif_day_of_week[new Date(data.date).getDay()]
+      //     const notif_month = notif_month_name[new Date(data.date).getMonth()]
+      //     const firebase_msg = {
+      //       topic: `kidparent_childid_${data_child.id}`,
+      //       notification: {
+      //         title: `Daily Report ${notif_name} siap dibaca~`,
+      //         body: `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`,
+      //       },
+      //       data: {
+      //         // topic: `kidparent_childid_${data_child.id}`,
+      //         report_id: `${data.id}`,
+      //         status: 'new'
+      //         // title: `Daily Report ${notif_name} siap dibaca~`,
+      //         // body: `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+      //       },
+      //       android: {
+      //         priority: 'high',
+      //         notification: {
+      //           channel_id: 'kidparent_importance_channel'
+      //         }
+      //       },
+      //       apns: {
+      //         headers: {
+      //           'apns-priority': '10'
+      //         }
+      //       }
+      //     };
 
-          db.sendMessage(firebase_msg)
-        })
-      }
+      //     db.sendMessage(firebase_msg)
+      //   })
+      // }
 
       res.send({id: data.id});
     })
@@ -529,52 +598,47 @@ exports.edit = async (req, res) => {
     .then(num => {
       if (num == 1) {
 
-        Report.findOne({where: {id: id}, include: Child}).then(data_report => {
+        // Report.findOne({where: {id: id}, include: Child}).then(data_report => {
 
-          if(data_report.is_ready_to_share == 1 || data_report.shared_at != null) {
+        //   if(data_report.is_ready_to_share == 1 || data_report.shared_at != null) {
             
-            const notif_name = data_report.child.nickname ?? data_report.child.name
-            const notif_date = new Date(data_report.date).getDate()
-            const notif_day = notif_day_of_week[new Date(data_report.date).getDay()]
-            const notif_month = notif_month_name[new Date(data_report.date).getMonth()]
-            const firebase_msg = {
-              topic: `kidparent_childid_${data_report.child_id}`,
-              notification: {},
-              data: {
-                // topic: `kidparent_childid_${data_report.child_id}`,
-                report_id: `${data_report.id}`
-              },
-              android: {
-                priority: 'high',
-                notification: {
-                  channel_id: 'kidparent_importance_channel'
-                }
-              },
-              apns: {
-                headers: {
-                  'apns-priority': '10'
-                }
-              }
-            };
+        //     const notif_name = data_report.child.nickname ?? data_report.child.name
+        //     const notif_date = new Date(data_report.date).getDate()
+        //     const notif_day = notif_day_of_week[new Date(data_report.date).getDay()]
+        //     const notif_month = notif_month_name[new Date(data_report.date).getMonth()]
+        //     const firebase_msg = {
+        //       topic: `kidparent_childid_${data_report.child_id}`,
+        //       notification: {},
+        //       data: {
+        //         report_id: `${data_report.id}`
+        //       },
+        //       android: {
+        //         priority: 'high',
+        //         notification: {
+        //           channel_id: 'kidparent_importance_channel'
+        //         }
+        //       },
+        //       apns: {
+        //         headers: {
+        //           'apns-priority': '10'
+        //         }
+        //       }
+        //     };
 
-            if(report_old.is_ready_to_share==0 && data_report.is_ready_to_share==1) {
-              // firebase_msg.data.title = `Daily Report ${notif_name} siap dibaca~`
-              // firebase_msg.data.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
-              firebase_msg.notification.title = `Daily Report ${notif_name} siap dibaca~`
-              firebase_msg.notification.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
-              firebase_msg.data.status = 'new'
-            } else {
-              // firebase_msg.data.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
-              // firebase_msg.data.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
-              firebase_msg.notification.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
-              firebase_msg.notification.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
-              firebase_msg.data.status = 'update'
-            }
+        //     if(report_old.is_ready_to_share==0 && data_report.is_ready_to_share==1) {
+        //       firebase_msg.notification.title = `Daily Report ${notif_name} siap dibaca~`
+        //       firebase_msg.notification.body = `Yuk lihat bagaimana perkembangan ${notif_name} per hari ${notif_day} tanggal ${notif_date} ${notif_month}.\n\nTerima kasih sudah mempercayakan ${notif_name} di KinderCastle :)`
+        //       firebase_msg.data.status = 'new'
+        //     } else {
+        //       firebase_msg.notification.title = `Daily Report ${notif_name} (${notif_date} ${notif_month}) diperbarui~`
+        //       firebase_msg.notification.body = `Ada info baru di Daily Report ${notif_name} per tanggal ${notif_date} ${notif_month}.\n\nMohon klik di sini untuk membaca report terbarunya ya. Terima kasih :)`
+        //       firebase_msg.data.status = 'update'
+        //     }
 
-            db.sendMessage(firebase_msg)
-          }
+        //     db.sendMessage(firebase_msg)
+        //   }
 
-        })
+        // })
 
         res.send({id: id});
       } else {

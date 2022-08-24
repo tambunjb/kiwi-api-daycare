@@ -14,6 +14,7 @@ exports.add = (req, res, next) => {
     name: req.body.name ?? null,
     address: req.body.address ?? '',
     desc: req.body.desc ?? '',
+    is_active: req.body.is_active ?? 1,
     created_by: req.user
   };
   
@@ -43,6 +44,9 @@ exports.index = (req, res) => {
   	if(req.query.desc){
   		condition.where.desc = { [Op.like]: `%${req.query.desc}%` }
   	}
+    if(req.query.is_active){
+      condition.where.is_active = { [Op.eq]: `%${req.query.is_active}%` }
+    }
   }
 
   const { page, size } = req.query;

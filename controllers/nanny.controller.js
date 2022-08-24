@@ -84,6 +84,7 @@ exports.add = (req, res) => {
     user_id: req.body.user_id ?? null,
     name: req.body.name ?? null,
     location_id: req.body.location_id ?? null,
+    is_active: req.body.is_active ?? 1,
     created_by: req.user
   };
   
@@ -113,6 +114,9 @@ exports.index = (req, res) => {
   	if(req.query.location_id){
   		condition.where.location_id = { [Op.eq]: req.query.location_id }
   	}
+    if(req.query.is_active){
+      condition.where.is_active = { [Op.eq]: req.query.is_active }
+    }
   }
 
   const { page, size } = req.query;

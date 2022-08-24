@@ -18,6 +18,9 @@ module.exports = (sequelize, Sequelize) => {
     date_of_birth: {
       type: Sequelize.DATEONLY
     },
+    is_active: {
+      type: Sequelize.INTEGER
+    },
     deleted_at: {
       type: Sequelize.DATE
     },

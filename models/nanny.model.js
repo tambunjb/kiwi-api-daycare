@@ -8,6 +8,9 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false
     },
+    is_active: {
+      type: Sequelize.INTEGER
+    },
     deleted_at: {
       type: Sequelize.DATE
     },

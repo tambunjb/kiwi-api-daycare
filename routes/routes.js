@@ -53,6 +53,7 @@ module.exports = app => {
   router.get("/report/get-by-same-nanny-location", report.getBySameNannyLocation);
   router.post("/report/set-absent/:id", report.setAbsent);
   router.get("/report/get-by-guardian", report.getByGuardian);
+  router.post("/report/send-notif/:id", report.sendNotif);
 
   router.use('/meal-config', auth);
   router.post("/meal-config/set-by-location/:location_id", mealConfig.setByLocation);
