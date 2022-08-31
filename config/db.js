@@ -58,7 +58,10 @@ db.userToken = (obj) => {
   }
 
   try {
-    jwt.verify(obj.token, process.env.TOKENKEY);
+    const decoded = jwt.verify(obj.token, process.env.TOKENKEY)
+    if(obj.phone!=decoded.phone)
+      throw Error('phone number modified')
+    
     return obj.token;
   } catch (err) {
     return jwt.sign(
