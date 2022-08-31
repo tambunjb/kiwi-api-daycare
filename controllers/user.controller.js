@@ -105,9 +105,14 @@ exports.loginNanny = async (req, res) => {
 };
 
 exports.loginGuardian = async (req, res) => {
-  let condition = {
-    phone: req.body.phone ?? null
-  };
+  if (!req.body.phone) {
+    return res.status(400).send("Phone can not be empty!");
+  }
+
+  let condition = { [Op.or]: [
+    { phone: req.body.phone },
+    { phone: req.body.phone.replace('+', '') }
+  ]}
 
   User.findOne({ where: condition, include: Guardian })
     .then(async (data) => {
