@@ -230,7 +230,7 @@ exports.getByGuardian = async (req, res) => {
   Report.findAndCountAll(condition)
     .then(data => {
       data.rows.forEach(row => {
-        row.setDataValue('nanny_name', row.nanny.name);
+        row.setDataValue('nanny_name', row.nanny!=null?row.nanny.name:'');
         row.setDataValue('child_name', row.child.name);
         row.setDataValue('nickname', row.child.nickname ?? row.child.name)
         row.setDataValue('location_name', row.location.name);
