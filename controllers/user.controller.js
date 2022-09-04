@@ -116,11 +116,13 @@ exports.loginGuardian = async (req, res) => {
 
   User.findOne({ where: condition, include: Guardian })
     .then(async (data) => {
+      let condition2 = { phone: data.phone }
       if(data && data.guardian) {
         if(data.token != null)
-          condition.token = data.token;
+          condition2.token = data.token;
         
-        const token = await db.userToken(condition);
+        const token = await db.userToken(condition2);
+
         return User.update({token: token, last_login: require('moment')().format('YYYY-MM-DD HH:mm:ss')}, {where: { id: data.id }, silent: true})
           .then(num => {
             return User.scope('defaultScope', 'auth').findByPk(data.id).then(res_user => {
