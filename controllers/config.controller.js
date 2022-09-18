@@ -270,6 +270,32 @@ exports.setVersionUpdate = (req, res, next) => {
   });
 };
 
+exports.addLog = (req, res, next) => {
+  // Validate request
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Content can not be empty!"
+    });
+  }
+
+  const config = {
+    name: req.body.name ?? null,
+    desc: req.body.desc ?? null,
+    value: req.body.value ?? null,
+  };
+  
+  Config.create(config)
+    .then(data => {
+      res.send({id: data.id});
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while creating the Config."
+      });
+    });
+};
+
 exports.add = (req, res, next) => {
   // Validate request
   if (!req.body) {

@@ -38,6 +38,7 @@ module.exports = app => {
   router.post("/login", user.login);
   router.post("/login-nanny", user.loginNanny);
   router.post("/login-guardian", user.loginGuardian);
+  router.post("/config/add-log", config.addLog); // without token
 
   router.use('/nanny', auth);
   router.post("/nanny/register", nanny.register);
