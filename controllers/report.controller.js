@@ -282,8 +282,8 @@ exports.getBySameNannyLocation = async (req, res) => {
   Report.findAndCountAll(condition)
     .then(data => {
       data.rows.forEach(row => {
-        row.setDataValue('nanny_name', row.nanny.name);
-        row.setDataValue('child_name', row.child.name);
+        row.setDataValue('nanny_name', row.nanny ?? row.nanny.name);
+        row.setDataValue('child_name', row.child ?? row.child.name);
         row.setDataValue('child_nickname', row.child.nickname ?? row.child.name)
       })
       const response = db.getPagingData(data, page, limit);
