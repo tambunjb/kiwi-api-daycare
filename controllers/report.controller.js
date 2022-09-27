@@ -21,7 +21,7 @@ exports.setAbsent = async (req, res) => {
     updated_by: req.user,
     arrival_time: null,
     // is_ready_to_share: 0,
-    shared_at: null,
+    shared_at: req.body.shared_at ?? null,
     child_feeling: null,
     temperature: null,
     condition: null,
