@@ -592,6 +592,12 @@ exports.edit = async (req, res) => {
   req.body.updated_by = req.user;
   const report_old = await Report.findOne({where: {id: id}})
 
+  if(report_old.attendance!=req.body.attendance) {
+    req.body.shared_at = null
+      if(req.body.attendance==1 && req.body.is_ready_to_share==null)
+        req.body.is_ready_to_share = 0
+  }
+
   Report.update(req.body, {
     where: { id: id }
   })
