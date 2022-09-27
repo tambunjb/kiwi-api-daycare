@@ -220,9 +220,9 @@ exports.getByGuardian = async (req, res) => {
 
   condition.include = [
     {model: MilkSession},
-    {model: Nanny},
-    {model: Child},
-    {model: Location},
+    {model: Nanny, paranoid: false},
+    {model: Child, paranoid: false},
+    {model: Location, paranoid: false},
     include_rating
   ];
 
@@ -274,8 +274,8 @@ exports.getBySameNannyLocation = async (req, res) => {
 
   condition.include = [
     {model: MilkSession},
-    {model: Nanny},
-    {model: Child}
+    {model: Nanny, paranoid: false},
+    {model: Child, paranoid: false}
   ];
 
   condition.distinct = true

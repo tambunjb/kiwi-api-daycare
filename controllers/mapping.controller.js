@@ -133,10 +133,12 @@ exports.getByLocation = (req, res, next) => {
     include: [ {
         model: Nanny,
         where: sub_condition,
+        paranoid: false,
         attributes: ['name']
       }, {
         model: Child,
         where: sub_condition,
+        paranoid: false,
         attributes: ['name']
       }
     ]
@@ -181,10 +183,12 @@ exports.getBySameNannyLocation = async (req, res) => {
   }
   condition.include = [ {
       model: Nanny,
-      where: sub_condition
+      where: sub_condition,
+      paranoid: false
     }, {
       model: Child,
-      where: sub_condition
+      where: sub_condition,
+      paranoid: false
     }
   ]
 
