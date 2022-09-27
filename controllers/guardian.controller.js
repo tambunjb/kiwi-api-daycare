@@ -87,7 +87,7 @@ exports.index = (req, res) => {
       condition.where.role = { [Op.like]: `%${req.query.role}%` }
     }
     if(req.query.is_active){
-      condition.where.is_active = { [Op.eq]: `%${req.query.is_active}%` }
+      condition.where.is_active = { [Op.eq]: req.query.is_active }
     }
   }
 
