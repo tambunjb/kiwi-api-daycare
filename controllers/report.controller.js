@@ -6,6 +6,7 @@ const Family = db.family;
 const Nanny = db.nanny;
 const Child = db.child;
 const MilkSession = db.milkSession;
+const NapTime = db.napTime;
 const Location = db.location;
 const Rating = db.rating;
 const Op = db.Sequelize.Op;
@@ -75,9 +76,20 @@ exports.setAbsent = async (req, res) => {
             });
         }
 
-        Report.update(fieldsAbsent, {where: { id: id }}, {transaction: t}).then(num => {
-          if(num==1) res.send({id: id})
-        })
+        NapTime.findAll(condition)
+          .then(data_nap => {
+          for(let i=0;i<data_nap.length;i++) {
+            NapTime.update({deleted_by: req.user}, {where: {id: data_nap[i].id}, silent: true}, {transaction: t})
+              .then(num => {
+                NapTime.destroy({where: { id: data_nap[i].id }}, {transaction: t});
+              });
+          }
+
+          Report.update(fieldsAbsent, {where: { id: id }}, {transaction: t}).then(num => {
+            if(num==1) res.send({id: id})
+          })
+
+        });
     });
   }).catch(err => {
     res.status(500).send({
@@ -220,6 +232,7 @@ exports.getByGuardian = async (req, res) => {
 
   condition.include = [
     {model: MilkSession},
+    {model: NapTime},
     {model: Nanny, paranoid: false},
     {model: Child, paranoid: false},
     {model: Location, paranoid: false},
@@ -274,6 +287,7 @@ exports.getBySameNannyLocation = async (req, res) => {
 
   condition.include = [
     {model: MilkSession},
+    {model: NapTime},
     {model: Nanny, paranoid: false},
     {model: Child, paranoid: false}
   ];
@@ -284,7 +298,8 @@ exports.getBySameNannyLocation = async (req, res) => {
       data.rows.forEach(row => {
         row.setDataValue('nanny_name', row.nanny.name);
         row.setDataValue('child_name', row.child.name);
-        row.setDataValue('child_nickname', row.child.nickname ?? row.child.name)
+        row.setDataValue('child_nickname', row.child.nickname ?? row.child.name);
+        row.setDataValue('child_meal_category', row.child.meal_category ?? 0);
       })
       const response = db.getPagingData(data, page, limit);
       res.send(response);

@@ -20,6 +20,7 @@ db.config = require("./config.model.js")(db.sequelize, db.Sequelize);
 db.location = require("./location.model.js")(db.sequelize, db.Sequelize);
 db.report = require("./report.model.js")(db.sequelize, db.Sequelize);
 db.milkSession = require("./milkSession.model.js")(db.sequelize, db.Sequelize);
+db.napTime = require("./napTime.model.js")(db.sequelize, db.Sequelize);
 db.mealConfig = require("./mealConfig.model.js")(db.sequelize, db.Sequelize);
 db.mapping = require("./mapping.model.js")(db.sequelize, db.Sequelize);
 db.guardian = require("./guardian.model.js")(db.sequelize, db.Sequelize);
@@ -128,7 +129,7 @@ db.mapping.belongsTo(db.child, {
   }
 });
 
-// report - nanny - child - milkSession - location
+// report - nanny - child - milkSession - napTime - location
 db.nanny.hasMany(db.report, {
   foreignKey: 'nanny_id'
 });
@@ -160,6 +161,16 @@ db.report.hasMany(db.milkSession, {
   foreignKey: 'report_id'
 });
 db.milkSession.belongsTo(db.report, {
+  foreignKey: {
+    name: 'report_id',
+    type: db.Sequelize.INTEGER,
+    allowNull: false
+  }
+});
+db.report.hasMany(db.napTime, {
+  foreignKey: 'report_id'
+});
+db.napTime.belongsTo(db.report, {
   foreignKey: {
     name: 'report_id',
     type: db.Sequelize.INTEGER,

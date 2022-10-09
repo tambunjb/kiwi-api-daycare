@@ -202,6 +202,7 @@ exports.getBySameNannyLocation = async (req, res) => {
           child_id: mapping.child_id,
           child_name: mapping.child.name,
           child_nickname: mapping.child.nickname ?? mapping.child.name,
+          child_meal_category: mapping.child.meal_category ?? 0,
           location_id: user.nanny.location_id
         }
       })

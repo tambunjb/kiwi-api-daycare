@@ -21,11 +21,12 @@ exports.setByLocation = async (req, res, next) => {
   }
 
   for(const meal of meals) {
-      if(meal.day_of_month==null || meal.type==null || meal.meal==null)
+      if(meal.category==null || meal.day_of_month==null || meal.type==null || meal.meal==null)
         continue
 
       let condition = {
-        location_id: location_id, 
+        location_id: location_id,
+        category: meal.category, 
         type: meal.type, 
         day_of_month: meal.day_of_month
       } 
@@ -92,6 +93,38 @@ exports.getByLocation = (req, res, next) => {
 
 }
 
+exports.getByLocationCategory = (req, res, next) => {
+  const location_id = req.params.location_id;
+  const category = req.params.category;
+  const day_of_month = req.params.day_of_month;
+
+  let condition = {};
+  condition.location_id = location_id
+  condition.category = category
+  if(day_of_month=='all' || parseInt(day_of_month)%1===0) {
+    if(day_of_month!='all')
+      condition.day_of_month = parseInt(day_of_month)
+  }else{
+    return res.status(400).send({
+      message: "Content invalid!"
+    });
+  }
+
+  MealConfig.findAll({ where: condition })
+    .then(data => {
+      if(data)
+        res.send(data);
+      else res.send({});
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving meal config."
+      });
+    });
+
+}
+
 exports.add = (req, res, next) => {
   // Validate request
   if (!req.body) {
@@ -103,6 +136,7 @@ exports.add = (req, res, next) => {
   const mealConfig = {
     location_id: req.body.location_id ?? null,
     day_of_month: req.body.day_of_month ?? null,
+    category: req.body.category ?? null,
     type: req.body.type ?? null,
     meal: req.body.meal ?? null,
     created_by: req.user
@@ -128,6 +162,9 @@ exports.index = (req, res) => {
   	if(req.query.location_id){
   		condition.where.location_id = { [Op.eq]: req.query.location_id }
   	}
+    if(req.query.category){
+      condition.where.category = { [Op.eq]: req.query.category }
+    }
   	if(req.query.day_of_month){
   		condition.where.day_of_month = { [Op.eq]: req.query.day_of_month }
   	}

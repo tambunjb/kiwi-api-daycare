@@ -1,16 +1,16 @@
 module.exports = (sequelize, Sequelize) => {
-  const MealConfig = sequelize.define("meal_config", {
-    category: {
-      type: Sequelize.INTEGER
+  const NapTime = sequelize.define("nap_time", {
+    start: {
+      type: Sequelize.TIME
     },
-    day_of_month: {
-      type: Sequelize.INTEGER
+    end: {
+      type: Sequelize.TIME
     },
-    type: {
+    notes: {
       type: Sequelize.STRING
     },
-    meal: {
-      type: Sequelize.STRING
+    deleted_at: {
+      type: Sequelize.DATE
     },
     deleted_by: {
       type: Sequelize.STRING
@@ -32,5 +32,5 @@ module.exports = (sequelize, Sequelize) => {
       attributes: { exclude: ['deleted_at', 'deleted_by', 'created_at', 'created_by', 'updated_at', 'updated_by'] }
     }
   });
-  return MealConfig;
+  return NapTime;
 };

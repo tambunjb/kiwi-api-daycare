@@ -11,6 +11,7 @@ module.exports = app => {
   const location = require("../controllers/location.controller.js");
   const report = require("../controllers/report.controller.js");
   const milkSession = require("../controllers/milkSession.controller.js");
+  const napTime = require("../controllers/napTime.controller.js");
   const mealConfig = require("../controllers/mealConfig.controller.js");
   const mapping = require("../controllers/mapping.controller.js");
   const family = require("../controllers/family.controller.js");
@@ -59,6 +60,7 @@ module.exports = app => {
   router.use('/meal-config', auth);
   router.post("/meal-config/set-by-location/:location_id", mealConfig.setByLocation);
   router.get("/meal-config/get-by-location/:location_id/:day_of_month", mealConfig.getByLocation);
+  router.get("/meal-config/get-by-location-category/:location_id/:category/:day_of_month", mealConfig.getByLocationCategory);
 
   router.use('/mapping', auth);
   router.post("/mapping/add-bulk/", mapping.addBulk);
@@ -131,6 +133,14 @@ module.exports = app => {
   router.get("/milk-session/view/:id", milkSession.view);
   router.post("/milk-session/edit/:id", milkSession.edit);
   router.post("/milk-session/del/:id", milkSession.del);
+
+  router.use('/nap-time', auth);
+  router.post("/nap-time/add", napTime.add);
+  router.get("/nap-time", napTime.index);
+  router.get("/nap-time/view/:id", napTime.view);
+  router.post("/nap-time/edit/:id", napTime.edit);
+  router.post("/nap-time/del/:id", napTime.del);
+  router.post("/nap-time/migrate", napTime.migrate);
 
   router.post("/meal-config/add", mealConfig.add);
   router.get("/meal-config", mealConfig.index);

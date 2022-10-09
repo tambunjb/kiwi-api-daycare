@@ -44,6 +44,7 @@ exports.add = (req, res, next) => {
     name: req.body.name ?? null,
     nickname: req.body.nickname ?? null,
     location_id: req.body.location_id ?? null,
+    meal_category: req.body.meal_category ?? null,
     gender: req.body.gender ?? null,
     date_of_birth: req.body.date_of_birth ?? null,
     is_active: req.body.is_active ?? 1,
@@ -75,6 +76,9 @@ exports.index = (req, res) => {
     }
     if(req.query.location_id){
       condition.where.location_id = { [Op.eq]: req.query.location_id }
+    }
+    if(req.query.meal_category){
+      condition.where.meal_category = { [Op.eq]: req.query.meal_category }
     }
   	if(req.query.gender){
   		condition.where.gender = { [Op.eq]: req.query.gender }
